@@ -1,0 +1,8 @@
+{
+  "tts": {
+    "doubao": {
+      "url": "http://doubao.aminer.cn/api/tts",
+      "headers": "asd"
+    }
+  }
+}

@@ -7,3 +7,6 @@ class Bot(object):
 
     def write(self):
         pass
+
+    def chat(self):
+        pass
