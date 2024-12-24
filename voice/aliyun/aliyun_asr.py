@@ -1,11 +1,11 @@
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
 from common.config import Config, conf
-from voice.stt import STT
+from voice.asr import ASR
 from funasr import AutoModel
 
 
-class AliyunSTT(STT):
+class AliyunASR(ASR):
     """
     SenseVoiceSmall开源语音识别模型
     识别不是很准

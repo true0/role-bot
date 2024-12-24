@@ -1,4 +1,4 @@
-class STT(object):
+class ASR(object):
     def voice_to_text_file(self, voice_file) -> str:
         """
         Send voice to voice service and get text

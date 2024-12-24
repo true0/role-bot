@@ -1,19 +1,24 @@
 from common.config import Config, conf
-from voice.aliyun.aliyun_stt import AliyunSTT
 from voice.tts import TTS
 
 
-class DouYinVoice(TTS, AliyunSTT):
-    def __init__(self, config=None):
+class DouYinTTS(TTS):
+    def __init__(self, config: Config = None):
         super().__init__()
         if config is None:
             config = conf()
         self.tts_url = config['douyin_tts_url']
         self.app_id = config['douyin_app_id']
         self.token = config['douyin_token']
+        self.voice_type = config['douyin_voice_type']
+
+    def text_to_voice(self, text, ):
+        print(text)
+
+    def text_to_voice_stream(self, text):
+        print(text)
 
 
 if __name__ == '__main__':
-    voice = DouYinVoice()
-    text = voice.voice_to_text_bytes('C:\\tools\projects\python\WeChat_cli\doubao\\test\\vioce.WAV')
-    print(text)
+    voice = DouYinTTS()
+    voice.text_to_voice('hello')
