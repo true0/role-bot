@@ -6,9 +6,7 @@ from common.log import logger
 
 # 配置可用的默认设置
 available_setting = {
-    "doubao_tts_url": "",
-    "stt": {
-    }
+    "douyin_tts_url": "",
 }
 
 default_config_file = "default_config.json"
@@ -98,3 +96,5 @@ def conf() -> Config:
     """获取全局配置实例"""
     return config
 
+if __name__ == '__main__':
+    print(config["douyin_tts_url"])

@@ -1,8 +1,3 @@
 {
-  "tts": {
-    "doubao": {
-      "url": "http://doubao.aminer.cn/api/tts"
-    }
-  },
-  "asd": ""
+  "douyin_tts_url": "https://openspeech.bytedance.com/api/v1/tts"
 }
