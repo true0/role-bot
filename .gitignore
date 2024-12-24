@@ -1,0 +1,6 @@
+*.log
+.idea
+.vscode
+.wechaty/
+__pycache__/
+config.json
