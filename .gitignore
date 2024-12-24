@@ -3,4 +3,4 @@
 .vscode
 .wechaty/
 __pycache__/
-config.json
+config/config.json
