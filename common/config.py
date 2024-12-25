@@ -7,10 +7,11 @@ from common.log import logger
 # 配置可用的默认设置
 available_setting = {
     # 抖音TTS
-    "douyin_tts_url": "",
+    "douyin_tts_host": "",
     "douyin_app_id": "",
     "douyin_token": "",
     "douyin_voice_type": "",  # 声音id
+    "douyin_cluster": "",
     # SenseVoiceSmall开源识别模型
     "funasr_model": "",  # 模型地址
     "funasr_vad_model": "",  # vad模型地址

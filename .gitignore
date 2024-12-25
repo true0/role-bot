@@ -4,3 +4,6 @@
 .wechaty/
 __pycache__/
 config/config.json
+*.wav
+*.mp3
+*.mp4
