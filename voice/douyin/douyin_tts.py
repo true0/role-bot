@@ -24,7 +24,7 @@ class DouYinTTS(TTS):
 
 if __name__ == '__main__':
     voice = DouYinTTS()
-    voice_stream = voice.text_to_voice_stream('哈哈哈，笑死我啦，假仁门谁懂啊，今天遇到了一个虾头男')
-    with open('DouBao.wav', 'wb') as wf:
-        for tts_voice in voice_stream:
-            wf.write(tts_voice)
+    # voice_stream = voice.text_to_voice_stream('哈哈哈，笑死我啦，假仁门谁懂啊，今天遇到了一个虾头男')
+    # with open('DouBao.wav', 'wb') as wf:
+    #     for tts_voice in voice_stream:
+    #         wf.write(tts_voice)
