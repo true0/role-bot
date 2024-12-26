@@ -7,3 +7,4 @@ config/config.json
 *.wav
 *.mp3
 *.mp4
+flet/
