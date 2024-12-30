@@ -6,6 +6,15 @@ from common.log import logger
 
 # 配置可用的默认设置
 available_setting = {
+    # 身份提示词
+    "sys_prompt": "",
+    # 模型名称
+    "model_name": "",
+    # ollama_api
+    "ollama_api": "",
+    # ollama_options
+    "ollama_options": {},  # 与官方一直
+
     # 抖音TTS
     "douyin_tts_host": "",
     "douyin_app_id": "",
