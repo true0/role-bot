@@ -1,3 +1,15 @@
 {
-    "douyin_tts_url": ""
+    "sys_prompt": "",
+    "model_name": "",
+    "model_stream": false,
+    "ollama_api": "",
+    "ollama_options": {},
+    "douyin_tts_host": "",
+    "douyin_app_id": "",
+    "douyin_token": "",
+    "douyin_voice_type": "",
+    "douyin_cluster": "",
+    "funasr_model": "",
+    "funasr_vad_model": "",
+    "funasr_device": ""
 }

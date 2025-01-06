@@ -1,15 +1,13 @@
 import ollama
 
-from common.config import Config, conf
+from common.config import conf
 from model.model import Model
 
 
 class OllamaModel(Model):
-    def __init__(self, config: Config = None):
-        if config is None:
-            config = conf()
+    def __init__(self):
+        config = conf()
         ollama_api = config['ollama_api']
-        self.sys_prompt = config['sys_prompt']
         self.model_name = config['model_name']
         self.options = config['ollama_options']
         self.model = ollama.Client(host=ollama_api)

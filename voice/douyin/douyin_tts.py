@@ -1,13 +1,12 @@
-from common.config import Config, conf
+from common.config import conf
 from voice.douyin.douyin_client import http_client, websocket_client
 from voice.tts import TTS
 
 
 class DouYinTTS(TTS):
-    def __init__(self, config: Config = None):
+    def __init__(self):
         super().__init__()
-        if config is None:
-            config = conf()
+        config = conf()
         self.tts_url = config['douyin_tts_host']
         self.app_id = config['douyin_app_id']
         self.token = config['douyin_token']

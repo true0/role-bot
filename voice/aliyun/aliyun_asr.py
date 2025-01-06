@@ -1,6 +1,6 @@
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
-from common.config import Config, conf
+from common.config import conf
 from voice.asr import ASR
 from funasr import AutoModel
 
@@ -10,9 +10,9 @@ class AliyunASR(ASR):
     SenseVoiceSmall开源语音识别模型
     识别不是很准
     """
-    def __init__(self, config=None):
-        if config is None:
-            config = conf()
+
+    def __init__(self):
+        config = conf()
         funasr_model_path = config['funasr_model']
         funasr_vad_model = config['funasr_vad_model']
         funasr_device = config['funasr_device']

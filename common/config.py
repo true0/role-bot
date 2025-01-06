@@ -10,10 +10,12 @@ available_setting = {
     "sys_prompt": "",
     # 模型名称
     "model_name": "",
+    # 模型流式
+    "model_stream": False,
     # ollama_api
     "ollama_api": "",
     # ollama_options
-    "ollama_options": {},  # 与官方一直
+    "ollama_options": {},  # 与官方一致
 
     # 抖音TTS
     "douyin_tts_host": "",
@@ -117,4 +119,4 @@ def conf() -> Config:
 
 
 if __name__ == '__main__':
-    print(config["douyin_tts_url"])
+    print(config["douyin_tts_host"])
