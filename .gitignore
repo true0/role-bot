@@ -3,7 +3,7 @@
 .vscode
 .wechaty/
 __pycache__/
-config/config.json
+config/
 *.wav
 *.mp3
 *.mp4
