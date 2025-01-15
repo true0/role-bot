@@ -1,7 +1,7 @@
 from funasr.utils.postprocess_utils import rich_transcription_postprocess
 
+from common.asr import ASR
 from common.config import conf
-from voice.asr import ASR
 from funasr import AutoModel
 
 
@@ -28,7 +28,7 @@ class AliyunASR(ASR):
     def voice_to_text_bytes(self, voice_bytes):
         res = self.funasr_model.generate(input=voice_bytes, cache={}, language="zh", use_itn=False, batch_size_s=0,
                                          disable_pbar=True)
-        # return rich_transcription_postprocess(res[0]['text'])
+        return rich_transcription_postprocess(res[0]['text'])
         # print(res)
-        text = res[0]['text'].replace(" ", "")
-        return text
+        # text = res[0]['text'].replace(" ", "")
+        # return text

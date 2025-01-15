@@ -1,6 +1,6 @@
 from common.config import conf
-from voice.douyin.douyin_client import http_client, websocket_client
-from voice.tts import TTS
+from common.douyin.douyin_client import http_client, websocket_client
+from common.tts import TTS
 
 
 class DouYinTTS(TTS):

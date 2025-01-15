@@ -12,6 +12,9 @@ available_setting = {
     "model_name": "",
     # 模型流式
     "model_stream": False,
+    # VAD模型路径
+    "vad_path": "",
+    "vad_device": "",
     # ollama_api
     "ollama_api": "",
     # ollama_options
@@ -119,4 +122,7 @@ def conf() -> Config:
 
 
 if __name__ == '__main__':
-    print(config["douyin_tts_host"])
+    if config["vad_path"]:
+        print(config["vad_path"])
+    else:
+        print("vad_path not found")

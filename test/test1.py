@@ -36,15 +36,11 @@ def recognition(input_file: bytes) -> str:
                                 disable_pbar=True)
     text = rich_transcription_postprocess(res[0]['text'])
     print("\n---->", text, "\n")
-    # if text:
-    #     content = chat_llama(text)
-    #     for i in content:
-    #         print(i, end="", flush=True)
 
 
 if __name__ == '__main__':
     model, utils = torch.hub.load(
-        repo_or_dir='C:\\tools\projects\python\\ai-bot\model\snakers4-silero-vad-46f94b7',
+        repo_or_dir='C:\\tools\projects\python\\ai-bot\config\model\snakers4-silero-vad-46f94b7',
         model='silero_vad',
         trust_repo=None,
         source='local',
