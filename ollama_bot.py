@@ -1,8 +1,10 @@
+import re
 import threading
 import time
 from queue import Queue, Empty
 from threading import Lock
 import numpy as np
+import ollama
 import pyaudio
 import torch
 from bot import Bot
@@ -18,6 +20,7 @@ CHUNK_SIZE = 512
 class OllamaBot(Bot):
     def __init__(self):
         config = conf()
+        self.model_name = config['model_name']
         # 程序运行状态
         p = pyaudio.PyAudio()
         self.running = True
@@ -178,6 +181,22 @@ class OllamaBot(Bot):
 
     def chat(self):
         pass
+
+    def chat_llama(self, history: list):
+        try:
+            response = ollama.chat(model=self.model_name, messages=history, stream=True, options={"top_p": 0.9})
+            print("模型已回复")
+            buffer = ""
+            for chunk in response:
+                if content := chunk['message']['content']:
+                    buffer += content
+                    while match := re.search(r'[^，。！？]*[，。！？]', buffer):
+                        yield match.group()
+                        buffer = buffer[match.end():]
+            if buffer.strip():
+                yield buffer
+        except ollama.ResponseError as e:
+            print('Error:', e.error)
 
 
 if __name__ == '__main__':
