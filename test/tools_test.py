@@ -23,6 +23,25 @@ tools = [
     {
         "type": "function",
         "function": {
+            "name": "websearch",
+            "description": "当你想获取网络上最新的未知信息是非常有用",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "query": {
+                        "type": "string",
+                        "description": "你想要查询的问题，目前仅支持中文问题。"
+                    }
+                }
+            },
+            "required": [
+                "query"
+            ]
+        }
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "get_current_weather",
             "description": "当你想查询指定城市的天气时非常有用。",
             "parameters": {  # 查询天气时需要提供位置，因此参数设置为location
@@ -41,15 +60,18 @@ tools = [
     }
 ]
 
+
 # 获取当前时间的工具函数
 def get_current_time():
     current_datetime = datetime.now()
     formatted_time = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
     return f"当前时间：{formatted_time}。"
 
+
 def get_day():
     today = datetime.now().date()
     return f"今天是{today.year}年{today.month}月{today.day}日"
+
 
 def get_current_weather(location):
     response = requests.get(
@@ -60,6 +82,12 @@ def get_current_weather(location):
         weather = parsed_data["results"][0]["now"]
         last_update = parsed_data["results"][0]["last_update"]
         return f"当前{location['name']}天气：{weather['text']}, 温度{weather['temperature']}℃，更新时间：{last_update}。"
+
+
+def websearch(query):
+    print("拿到的问题为:", query)
+    return "功能暂未实现"
+
 
 # 调用模型并处理工具调用
 def chat_llama_tools(history: list):
@@ -84,6 +112,9 @@ def chat_llama_tools(history: list):
             elif tool_name == "get_current_weather":
                 location = tool_args.get("location", "")
                 tool_result = get_current_weather(location)
+            elif tool_name == "websearch":
+                query = tool_args.get("query", "")
+                tool_result = websearch(query)
             else:
                 tool_result = "未知工具"
 
@@ -102,8 +133,9 @@ def chat_llama_tools(history: list):
 
     return response
 
+
 # 主程序
 if __name__ == '__main__':
     history = [{"role": "system", "content": "你是一个智能助手，给你的数据都是准确的，不要说多余的话"},
-               {"role": "user", "content": "今天是什么日子，你可以告诉我现在多少点了吗？，广州现在温度怎么样？"}]
+               {"role": "user", "content": "今天天气怎么样？"}]
     response = chat_llama_tools(history)
