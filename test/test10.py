@@ -1,0 +1,31 @@
+import re
+
+import ollama
+
+
+def chat_llama(history: list):
+    try:
+        response = ollama.Client(host='http://192.168.88.253:11434').chat(model="llama3.1:8b", messages=history,
+                                                                          stream=True, options={"top_p": 0.9})
+        print("模型已回复")
+        buffer = ""
+        for chunk in response:
+            if content := chunk['message']['content']:
+                buffer += content
+                while match := re.search(r'[^，。！？]*[，。！？]', buffer):
+                    yield match.group()
+                    buffer = buffer[match.end():]
+        if buffer.strip():
+            yield buffer
+    except ollama.ResponseError as e:
+        print('Error:', e.error)
+
+
+if __name__ == '__main__':
+    history = [{"role": "user", "content": "你好"}]
+    printed_sentences = set()
+    response = chat_llama(history)
+    for sentence in response:
+        if sentence in printed_sentences:  # 跳过已经处理过的句子
+            continue
+        printed_sentences.add(sentence)

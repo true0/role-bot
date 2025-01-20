@@ -9,6 +9,7 @@ import pyaudio
 import torch
 from bot import Bot
 from common.config import conf
+from common.message import Message
 from common.sensevoice.sensevoice import AliyunASR
 
 FORMAT = pyaudio.paInt16
@@ -17,12 +18,15 @@ SAMPLE_RATE = 16000
 CHUNK_SIZE = 512
 
 
+# TODO 出现资源竞争问题，暂未解决
 class OllamaBot(Bot):
     def __init__(self):
         config = conf()
         self.model_name = config['model_name']
-        # 程序运行状态
+        self.model_api = config['ollama_api']
         p = pyaudio.PyAudio()
+        self.messages = Message()
+        # 程序运行状态
         self.running = True
         # 是否正在说话
         self.speak = False
@@ -86,7 +90,7 @@ class OllamaBot(Bot):
     def start(self):
         print("程序运行...")
         self.running = True
-        # self.bot_write.start()
+        self.bot_write.start()
         self.bot_chat.start()
         self.bot_read.start()
         while self.running:
@@ -95,20 +99,15 @@ class OllamaBot(Bot):
 
     def write(self):
         while self.running:
-            try:
+            if self.bot_out.is_active():
                 if not self.output_voice.empty():
-                    if self.is_speaking():
-                        time.sleep(0.3)
-                        continue
                     try:
-                        if not self.bot_out.is_active():
-                            self.bot_out.start_stream()
                         out_voice = self.output_voice.get(timeout=1)
-                        self.bot_out.write(out_voice)
+                        # self.bot_out.write(out_voice)
+                        print("播放音频")
+                        print(out_voice)
                     except Empty:
                         continue
-            except Exception as e:
-                print(f"写回线程错误: {str(e)}")
 
     def read(self):
         audio_data = b""
@@ -155,6 +154,8 @@ class OllamaBot(Bot):
                     # 将缓冲区的音频添加到录音数据中
                     audio_data = b"".join(audio_buffer)
                     last_voice_time = current_time
+                    if self.bot_out.is_active():
+                        self.bot_out.stop_stream()
 
                 if is_recording:
                     audio_data += audio_chunk
@@ -169,22 +170,42 @@ class OllamaBot(Bot):
                         print(f"\n检测到持续静音 {silence_duration:.1f} 秒，停止录音...")
                         is_recording = False
                         if len(audio_data) > 0:
+                            print("开始识别...")
                             text = self.asr.voice_to_text_bytes(audio_data)
                             print(f"识别结果: {text}")
                             audio_data = b""
                             confidence_history.clear()
                             audio_buffer.clear()
                         self.set_speak(False)
-
+                        if not self.bot_out.is_active():
+                            self.bot_out.start_stream()
             except Exception as e:
                 print(f"发生错误: {e}")
 
     def chat(self):
-        pass
+
+        while self.running:
+            if not self.input_text.empty():
+                try:
+                    printed_sentences = set()
+                    out_text = self.input_text.get(timeout=1)
+                    self.messages.add_query(out_text)
+                    for text in self.chat_llama(self.messages.messages):
+                        # TODO tts生成回复音频
+                        print("生成回复")
+                        print(text)
+                        if self.bot_out.is_active():
+                            printed_sentences.clear()
+                            break
+                        self.output_voice.put(text)
+                    printed_sentences.clear()
+                except Empty:
+                    continue
 
     def chat_llama(self, history: list):
         try:
-            response = ollama.chat(model=self.model_name, messages=history, stream=True, options={"top_p": 0.9})
+            response = ollama.Client(host=self.model_api).chat(model=self.model_name, messages=history, stream=True,
+                                                               options={"top_p": 0.9})
             print("模型已回复")
             buffer = ""
             for chunk in response:
