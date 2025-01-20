@@ -12,7 +12,7 @@ class GetTime(BaseTool):
     description = "获取计算机系统当前时间。"
     parameters = []  # 获取时间无需参数
 
-    def call(self, params: str, **kwargs):
+    def call(self, params: str, **kwargs) -> str:
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
         return f"当前时间：{formatted_time}。"
@@ -23,7 +23,7 @@ class GetDays(BaseTool):
     description = "获取计算机系统当前日期。"
     parameters = []  # 获取时间无需参数
 
-    def call(self, params: str, **kwargs):
+    def call(self, params: str, **kwargs) -> str:
         today = datetime.now().date()
         return f"今天是{today.year}年{today.month}月{today.day}日"
 
@@ -38,7 +38,7 @@ class GetWeatherData(BaseTool):
         'required': True
     }]
 
-    def call(self, params: str, **kwargs):
+    def call(self, params: str, **kwargs) -> str:
         location = json5.loads(params)['location']
         if not location:
             return "请告诉我您想查询哪个地方的天气。"
@@ -75,7 +75,7 @@ class MyImageGen(BaseTool):
 
 # 步骤 2：配置您所使用的 LLM。
 llm_cfg = {
-    'model': 'qwen2.5',
+    'model': 'qwen2.5:14b',
     'model_server': 'http://localhost:11434/v1/',  # base_url，也称为 api_base
     'api_key': 'ollama',
     # （可选） LLM 的超参数：
@@ -91,7 +91,7 @@ system_instruction = '''你是一个乐于助人的AI助手。my_image_gen
 - 用清晰、友好的语言回复用户。
 你总是用中文回复用户。'''
 tools = ['get_time', "get_day", 'get_weather', 'my_image_gen',
-         'code_interpreter']  # `code_interpreter` 是框架自带的工具，用于执行代码。
+         'code_interpreter','web_extractor']  # `code_interpreter` 是框架自带的工具，用于执行代码。
 bot = Assistant(llm=llm_cfg,
                 system_message=system_instruction,
                 function_list=tools,
