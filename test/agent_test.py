@@ -15,13 +15,13 @@ class GetTime(BaseTool):
     def call(self, params: str, **kwargs) -> str:
         current_datetime = datetime.now()
         formatted_time = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
-        return f"当前时间：{formatted_time}。"
+        return f"当前系统时间为：{formatted_time}。"
 
 
 @register_tool('get_day')
 class GetDays(BaseTool):
     description = "获取计算机系统当前日期。"
-    parameters = []  # 获取时间无需参数
+    parameters = []
 
     def call(self, params: str, **kwargs) -> str:
         today = datetime.now().date()
@@ -34,14 +34,14 @@ class GetWeatherData(BaseTool):
     parameters = [{
         'name': 'location',
         'type': 'string',
-        'description': '需要查询的天气的地方。如果没有提供地点信息，需要主动询问用户。',
+        'description': '需要查询的天气的地方。如果没有提供地点信息则返回None',
         'required': True
     }]
 
     def call(self, params: str, **kwargs) -> str:
         location = json5.loads(params)['location']
         if not location:
-            return "请告诉我您想查询哪个地方的天气。"
+            return "请提供地点。"
         response = requests.get(
             f"https://api.seniverse.com/v3/weather/now.json?key=Si9lnzEH5n4dapO_p&location={location}&language=zh-Hans&unit=c")
         if response.status_code == 200:
@@ -73,7 +73,26 @@ class MyImageGen(BaseTool):
             ensure_ascii=False)
 
 
-# 步骤 2：配置您所使用的 LLM。
+class Agent:
+    def __init__(self, llm_cfg, system_instruction, tools):
+        self.llm_cfg = llm_cfg
+        self.system_instruction = system_instruction
+        self.tools = tools
+        self.bot = Assistant(llm=self.llm_cfg,
+                             system_message=self.system_instruction,
+                             function_list=self.tools)
+        self.messages = []  # 储存聊天历史
+
+    def send(self, query):
+        self.messages.append({'role': 'user', 'content': f'{query}'})  # 将用户请求添加到聊天历史
+        response = self.bot.run(messages=self.messages)
+        last_response = []
+        for message in response:
+            last_response = message
+        self.messages.extend(last_response)
+        return self.messages[-1]['content']
+
+
 llm_cfg = {
     'model': 'qwen2.5:14b',
     'model_server': 'http://localhost:11434/v1/',  # base_url，也称为 api_base
@@ -84,31 +103,23 @@ llm_cfg = {
     }
 }
 
-# 步骤 3：创建一个智能体。这里我们以 `Assistant` 智能体为例，它能够使用工具并读取文件。
 system_instruction = '''你是一个乐于助人的AI助手。my_image_gen
 在收到用户的请求后，你应该：
 - 如果用户没有提供必要的信息（如地点），主动询问用户。
 - 用清晰、友好的语言回复用户。
 你总是用中文回复用户。'''
+
 tools = ['get_time', "get_day", 'get_weather', 'my_image_gen',
-         'code_interpreter','web_extractor']  # `code_interpreter` 是框架自带的工具，用于执行代码。
+         'code_interpreter', 'web_extractor']  # `code_interpreter` 是框架自带的工具，用于执行代码。
+
 bot = Assistant(llm=llm_cfg,
                 system_message=system_instruction,
                 function_list=tools,
-                description="agent测试",
-                name="ai助手")
+                description="agent测试")
 
-WebUI(bot).run()
-# messages = []  # 这里储存聊天历史
-# while True:
-#     # 例如，输入请求 "绘制一只狗并将其旋转 90 度"。
-#     query = input('用户请求: ')
-#     # 将用户请求添加到聊天历史。
-#     messages.append({'role': 'user', 'content': query})
-#     response = []
-#     for response in bot.run(messages=messages):
-#         # 流式输出。
-#         print(response[0]['content'],end="")
-#         # pprint.pprint(response, indent=2)
-#     # 将机器人的回应添加到聊天历史。
-#     messages.extend(response)
+if __name__ == '__main__':
+    # WebUI(bot).run()
+    agent = Agent(llm_cfg, system_instruction, tools)
+    while True:
+        query = input('请输入你的问题：')
+        print(agent.send(query))

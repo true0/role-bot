@@ -1,6 +1,10 @@
+import smtplib
 from datetime import datetime
 import ollama
 import requests
+from email.header import Header
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
 
 # 定义工具
 tools = [
@@ -57,15 +61,69 @@ tools = [
                 "location"
             ]
         }
+    },
+    {
+        "type": "function",
+        "function": {
+            "name": "send_msg",
+            "description": "当你想发送邮件的时候非常有用。",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "receiver": {
+                        "type": "string",
+                        "description": "邮件的接收人，如果用户未提供则为None"
+                    },
+                    "title": {
+                        "type": "string",
+                        "description": "邮件的标题,生成你认为最合适的"
+                    },
+                    "body": {
+                        "type": "string",
+                        "description": "邮件的主要内容,可以生成你认为的尽量美观的邮件html格式"
+                    }
+                },
+                "required": [  # required 是 parameters 的直接子字段
+                    "receiver",
+                    "title",
+                    "body"
+                ]
+            }
+        }
     }
 ]
 
 
 # 获取当前时间的工具函数
+
+
 def get_current_time():
     current_datetime = datetime.now()
     formatted_time = current_datetime.strftime('%Y-%m-%d %H:%M:%S')
     return f"当前时间：{formatted_time}。"
+
+
+def send_msg(receiver, title, body) -> str:
+    if not receiver:
+        return "未确定收件人"
+    msg = MIMEMultipart()
+    msg['From'] = "327057576@qq.com"
+    msg['To'] = receiver
+    msg['Subject'] = title
+    msg.attach(MIMEText(body, 'html'))
+    try:
+        smtp_obj = smtplib.SMTP('smtp.qq.com', 587)
+        smtp_obj.starttls()
+        smtp_obj.login('327057576@qq.com', 'fghpmlptqwwzbicj')
+        smtp_obj.sendmail('327057576@qq.com', receiver, msg.as_string())
+        smtp_obj.quit()
+        return "邮件发送成功"
+    except smtplib.SMTPAuthenticationError as e:
+        print("email authentication error:", e)
+        return "邮件发送失败，认证错误"
+    except Exception as e:
+        print("email send fail", e)
+        return "邮件发送失败"
 
 
 def get_day():
@@ -91,7 +149,7 @@ def websearch(query):
 
 # 调用模型并处理工具调用
 def chat_llama_tools(history: list):
-    response = ollama.chat(model="qwen2.5", messages=history, stream=False, tools=tools)
+    response = ollama.chat(model="qwen2.5:14b", messages=history, stream=False, tools=tools)
     print("完整响应:", response)  # 打印完整响应以检查格式
 
     # 检查是否调用了工具
@@ -115,6 +173,12 @@ def chat_llama_tools(history: list):
             elif tool_name == "websearch":
                 query = tool_args.get("query", "")
                 tool_result = websearch(query)
+            elif tool_name == "send_msg":
+                receiver = tool_args.get("receiver", None)
+                title = tool_args.get("title", "")
+                body = tool_args.get("body", "")
+                print("发送邮件给:", receiver, "标题:", title, "内容:", body)
+                tool_result = send_msg(receiver, title, body)
             else:
                 tool_result = "未知工具"
 
@@ -125,7 +189,7 @@ def chat_llama_tools(history: list):
             history.append({"role": "tool", "name": tool_name, "content": tool_result})
 
         # 再次调用模型，传递工具结果
-        response = ollama.chat(model="qwen2.5", messages=history, stream=False)
+        response = ollama.chat(model="qwen2.5:14b", messages=history, stream=False)
         print("模型最终回复:", response["message"]["content"])
     else:
         print("模型没有调用工具，直接生成文本内容。")
@@ -137,5 +201,6 @@ def chat_llama_tools(history: list):
 # 主程序
 if __name__ == '__main__':
     history = [{"role": "system", "content": "你是一个智能助手，给你的数据都是准确的，不要说多余的话"},
-               {"role": "user", "content": "今天天气怎么样？"}]
+               {"role": "user",
+                "content": "帮我给宋珠文songzhuwen@multimodality.cn发一封邮件，告诉他今晚早点睡，明天要上班。"}]
     response = chat_llama_tools(history)
