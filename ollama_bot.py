@@ -18,14 +18,13 @@ SAMPLE_RATE = 16000
 CHUNK_SIZE = 512
 
 
-# TODO 出现资源竞争问题，暂未解决
 class OllamaBot(Bot):
     def __init__(self):
         config = conf()
         self.model_name = config['model_name']
         self.model_api = config['ollama_api']
         p = pyaudio.PyAudio()
-        self.messages = Message()
+        self.messages = Message(sys_prompt='请你扮演一个知识百科,用简短的回复回复内容,回答不要超过100字')
         # 程序运行状态
         self.running = True
         # 是否正在说话
@@ -66,6 +65,9 @@ class OllamaBot(Bot):
         # self.device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         self.vad_device = config['vad_device']
         self.vad_break_model = vad_model.to(self.vad_device)
+        self.asr_lock = Lock()  # 添加ASR锁
+        self.queue_timeout = 1  # 设置队列超时时间
+        self.asr_timeout = 10  # 设置ASR超时时间-
 
     def set_speak(self, value):
         with self.speak_lock:
@@ -99,15 +101,16 @@ class OllamaBot(Bot):
 
     def write(self):
         while self.running:
-            if self.bot_out.is_active():
-                if not self.output_voice.empty():
-                    try:
-                        out_voice = self.output_voice.get(timeout=1)
-                        # self.bot_out.write(out_voice)
-                        print("播放音频")
-                        print(out_voice)
-                    except Empty:
-                        continue
+            try:
+                if self.bot_out.is_active():
+                    out_voice = self.output_voice.get_nowait()  # 使用非阻塞获取
+                    print("播放音频---->", out_voice)
+                else:
+                    time.sleep(0.3)  # 添加短暂休眠
+            except Empty:
+                continue
+            except Exception as e:
+                print(f"Write error: {e}")
 
     def read(self):
         audio_data = b""
@@ -171,11 +174,14 @@ class OllamaBot(Bot):
                         is_recording = False
                         if len(audio_data) > 0:
                             print("开始识别...")
-                            text = self.asr.voice_to_text_bytes(audio_data)
+                            with self.asr_lock:  # 添加锁保护
+                                text = self.asr.voice_to_text_bytes(audio_data)
+                                if text.strip():  # 只有当识别出有效文本时才加入队列
+                                    self.input_text.put(text)
                             print(f"识别结果: {text}")
-                            audio_data = b""
-                            confidence_history.clear()
-                            audio_buffer.clear()
+                        audio_data = b""
+                        confidence_history.clear()
+                        audio_buffer.clear()
                         self.set_speak(False)
                         if not self.bot_out.is_active():
                             self.bot_out.start_stream()
@@ -183,30 +189,34 @@ class OllamaBot(Bot):
                 print(f"发生错误: {e}")
 
     def chat(self):
-
         while self.running:
-            if not self.input_text.empty():
-                try:
-                    printed_sentences = set()
-                    out_text = self.input_text.get(timeout=1)
+            try:
+                if not self.input_text.empty():
+                    out_text = self.input_text.get_nowait()  # 使用非阻塞获取
                     self.messages.add_query(out_text)
-                    for text in self.chat_llama(self.messages.messages):
-                        # TODO tts生成回复音频
-                        print("生成回复")
-                        print(text)
-                        if self.bot_out.is_active():
-                            printed_sentences.clear()
+                    printed_sentences = list()
+                    response = self.chat_llama(self.messages.messages)
+                    for text in response:
+                        if not self.running or not self.bot_out.is_active():
                             break
+                        printed_sentences.append(text)
                         self.output_voice.put(text)
+                    print("模型已回复---->", ''.join(printed_sentences))
+                    self.messages.add_reply(''.join(printed_sentences))
                     printed_sentences.clear()
-                except Empty:
-                    continue
+                else:
+                    time.sleep(0.3)  # 添加短暂休眠，减少CPU占用
+            except Empty:
+                continue
+            except Exception as e:
+                print(f"Chat error: {e}")
 
     def chat_llama(self, history: list):
         try:
+            print(history)
+            print(self.model_api, self.model_name)
             response = ollama.Client(host=self.model_api).chat(model=self.model_name, messages=history, stream=True,
                                                                options={"top_p": 0.9})
-            print("模型已回复")
             buffer = ""
             for chunk in response:
                 if content := chunk['message']['content']:

@@ -3,9 +3,7 @@ import os
 from datetime import datetime
 import json
 
-default_prompt = """
-
-"""
+default_prompt = """"""
 
 
 class Message(object):
@@ -15,6 +13,7 @@ class Message(object):
         else:
             self.sys_prompt = sys_prompt
         self.messages = []
+        self.reset()
 
     def reset(self):
         if len(self.messages) > 0:

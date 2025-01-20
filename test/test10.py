@@ -22,10 +22,15 @@ def chat_llama(history: list):
 
 
 if __name__ == '__main__':
-    history = [{"role": "user", "content": "你好"}]
+    history = [{'role': 'system', 'content': '请你扮演一个知识百科,用简短的回复回复内容,回答不要超过100字'},
+               {"role": "user", "content": "喂你好"}]
     printed_sentences = set()
+    printed_sentences_list = list()
     response = chat_llama(history)
     for sentence in response:
         if sentence in printed_sentences:  # 跳过已经处理过的句子
             continue
         printed_sentences.add(sentence)
+        printed_sentences_list.append(sentence)
+    print(''.join(printed_sentences))
+    print(printed_sentences_list)
