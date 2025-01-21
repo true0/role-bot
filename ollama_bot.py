@@ -67,7 +67,7 @@ class OllamaBot(Bot):
         self.vad_break_model = vad_model.to(self.vad_device)
         self.asr_lock = Lock()  # 添加ASR锁
         self.queue_timeout = 1  # 设置队列超时时间
-        self.asr_timeout = 10  # 设置ASR超时时间-
+        self.asr_timeout = 10  # 设置ASR超时时间
 
     def set_speak(self, value):
         with self.speak_lock:
@@ -80,7 +80,6 @@ class OllamaBot(Bot):
     def cleanup(self):
         print("开始清理资源...")
         self.running = False
-
         # 清空队列
         for q in [self.input_text, self.output_voice]:
             while not q.empty():
