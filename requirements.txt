@@ -1,4 +1,7 @@
 --index-url https://mirrors.aliyun.com/pypi/simple/
 
-ollama
+ollama~=0.4.4
 qwen-agent[rag,code_interpreter,python_executor,gui]
+pyaudio~=0.2.14
+numpy~=1.23.1
+funasr~=1.2.0

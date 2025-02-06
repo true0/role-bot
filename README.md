@@ -9,7 +9,7 @@
 - **ASR**: [SenseVoice](https://github.com/FunAudioLLM/SenseVoice)
 - **VAD**: [silero-vad](https://github.com/snakers4/silero-vad)
 - **LLM**: [ollama](https://ollama.com/)
-- **TTS**: [edge-tts](https://github.com/rany2/edge-tts)
+- **TTS**: --
 
 ## 功能列表
 

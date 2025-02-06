@@ -3,7 +3,7 @@ import os
 from datetime import datetime
 import json
 
-default_prompt = """"""
+default_prompt = """请你扮演一个知识百科,用简短的回复回复内容,回答不要超过100字"""
 
 
 class Message(object):

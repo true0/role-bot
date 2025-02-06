@@ -24,7 +24,8 @@ class OllamaBot(Bot):
         self.model_name = config['model_name']
         self.model_api = config['ollama_api']
         p = pyaudio.PyAudio()
-        self.messages = Message(sys_prompt='请你扮演一个知识百科,用简短的回复回复内容,回答不要超过100字')
+        # self.messages = Message(sys_prompt='请你扮演一个知识百科,用简短的回复回复内容,回答不要超过100字')
+        self.messages = Message()
         # 程序运行状态
         self.running = True
         # 是否正在说话
