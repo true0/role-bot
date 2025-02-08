@@ -8,28 +8,44 @@ from common.log import logger
 available_setting = {
     # 身份提示词
     "sys_prompt": "",
+
+    # 模型配置
     # 模型名称
     "model_name": "",
     # 模型流式
     "model_stream": False,
-    # VAD模型路径
-    "vad_path": "",
-    "vad_device": "",
     # ollama_api
     "ollama_api": "",
     # ollama_options
     "ollama_options": {},  # 与官方一致
 
+    # 识别配置
+    # VAD模型路径
+    "vad_path": "",
+    "vad_device": "",
+    # SenseVoiceSmall开源识别模型
+    "funasr_model": "",  # 模型地址
+    "funasr_vad_model": "",  # vad模型地址
+    "funasr_device": "",
+
+    # 语音合成配置
+    # tts流式
+    "tts_stream": False,
+    # 如果使用了音频文件则不需要填写说话人
+    # 说话人
+    "speaker": "",
+    # 说话人音频文件
+    "speaker_audio": "",
+    # 说话人音频文件内容
+    "speaker_prompt": "",
+    # cosyvoice模型
+    "cosyvoice_model": "",
     # 抖音TTS
     "douyin_tts_host": "",
     "douyin_app_id": "",
     "douyin_token": "",
     "douyin_voice_type": "",  # 声音id
     "douyin_cluster": "",
-    # SenseVoiceSmall开源识别模型
-    "funasr_model": "",  # 模型地址
-    "funasr_vad_model": "",  # vad模型地址
-    "funasr_device": ""
 
 }
 

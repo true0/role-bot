@@ -13,12 +13,18 @@ class CosyVoiceTTS(TTS):
         config = conf()
         # self.tts_url = config['douyin_tts_host']
         # SPEAKER
-        speaker = config['speaker']
+        speaker = config['speaker_audio']
+        cosyvoice_model = config['cosyvoice_model']
+        self.speaker_prompt = config['speaker_prompt']
         self.prompt_speaker_16k = load_wav(speaker, 16000)
-        cosyvoice = CosyVoice2('pretrained_models/CosyVoice2-0.5B')
+        self.cosyvoice = CosyVoice2(cosyvoice_model)
 
     def text_to_voice(self, text):
-        pass
+        for _, j in enumerate(self.cosyvoice.inference_zero_shot(
+                text, self.speaker_prompt, self.prompt_speaker_16k, stream=False)):
+            return j['tts_speech']
 
     def text_to_voice_stream(self, text):
-        pass
+        for j in self.cosyvoice.inference_zero_shot(
+                text, self.speaker_prompt, self.prompt_speaker_16k, stream=True):
+            yield j['tts_speech']
